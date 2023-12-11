@@ -1,63 +1,60 @@
-import React, { useEffect, useState } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import 'moment-hijri';
+// App.js
+import React from 'react';
+import { Calendar } from 'antd';
 import { hijriDate } from 'hijridate';
-const localizer = momentLocalizer(moment)
 
-// Function to generate events for each date in a month
-const  generateEventsForMonth = (month) => {
-  const events = [];
-  const startDate = new Date(month.gregorianStart);
+const convertDataToCalendarProps = (data) => {
+  const calendarData = {};
 
-  for (let day = 1; day <= month.daysInMonth; day++) {
-    const currentDate = new Date(startDate);
-    currentDate.setDate(startDate.getDate() + (day - 1));
-    
-    const event = {
-      title: `${month.hijriMonthName} - Day ${day}`,
-      start: currentDate.toISOString(),
-      end: currentDate.toISOString(), // You can customize the end time if needed
-    };
+  data.forEach((entry) => {
+    let startDate =  new Date(entry.gregorianStart);
+    let endDate = new Date(entry.gregorianEnd);
 
-    events.push(event);
-  }
-  return events;
-}
+    startDate.setDate(startDate.getDate() + 1)
+    endDate.setDate(endDate.getDate() + 1)
+
+    let t = 0
+    for (let date = startDate  ; date <= endDate; date.setDate(date.getDate() + 1)) {
+      const dateString = date.toISOString().split('T')[0];
+      calendarData[dateString] =  `${entry.hijriMonth} -  ${entry.hijriMonthName} ${++t}` ;
+    }
+  });
+
+  return {
+    dateCellRender: (date) => {
+      const dateString = date.toISOString().split('T')[0];
+      return <div style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        "text-align": "center",
+        padding: "8px", /* Adjust padding as needed */
+        // "background-color": rgba(255, 255, 255, 1);
+
+      }}>{calendarData[dateString]}</div>;
+    },
+  };
+};
+
+
+const HijriCalendar = ({ data }) => {
+  const calendarProps = convertDataToCalendarProps(data);
+
+  return (
+    <div>
+      <Calendar {...calendarProps} />
+    </div>
+  );
+};
 
 const App = () => {
-
-  const [year, setYear] = useState("2022")
-  const [allEvents, setAllEvents] = useState([])
-
-  const handleNavigate = (newDate, view, action) => {
-    let  date  = moment(newDate)
-    setYear(date.year())
-  };
-
-  useEffect(()=>{
-    const allEvents = hijriDate
-    .filter(({ gregorianStart }) => gregorianStart.includes(String(year)))
-    .map((month) => generateEventsForMonth(month))
-    .flat();
-
-    setAllEvents(allEvents)
-
-  },[year])
-
-  return   
-  <div style={{marginTop:50}}>
-    <Calendar
-      localizer={localizer}
-      events={allEvents}
-      startAccessor="start"
-      endAccessor="end"
-      views={['month']}
-      onNavigate={handleNavigate}
-      style={{ height: 500 }}
-    />
-</div>
+  return (
+    <div>
+      <h1>Hijri Calendar</h1>
+      <HijriCalendar data={hijriDate} />
+    </div>
+  );
 };
 
 export default App;
