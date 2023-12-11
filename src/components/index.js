@@ -1,2 +1,1 @@
-export * from "./ComponentOne";
-export * from "./Header";
+export * from "./molecules";
