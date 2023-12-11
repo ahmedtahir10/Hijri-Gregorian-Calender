@@ -17,8 +17,8 @@ const HijriCalendar = () => {
   return (
     <div
       style={{
-        paddingRight: 30,
-        paddingLeft: 30,
+        paddingRight: 32,
+        paddingLeft: 32,
       }}
     >
       <Calendar onChange={onDateChange} {...calendarProps} />
